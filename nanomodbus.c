@@ -149,6 +149,10 @@ static nmbs_error recv(nmbs_t* nmbs, uint16_t count) {
         return NMBS_ERROR_NONE;
     }
 
+    // Never read past the end of msg.buf: a frame whose fields ask for more than it holds is refused
+    if (nmbs->msg.buf_idx > sizeof(nmbs->msg.buf) || count > sizeof(nmbs->msg.buf) - nmbs->msg.buf_idx)
+        return NMBS_ERROR_INVALID_REQUEST;
+
     const int32_t ret =
             nmbs->platform.read(nmbs->msg.buf + nmbs->msg.buf_idx, count, nmbs->byte_timeout_ms, nmbs->platform.arg);
 
